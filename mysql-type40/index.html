@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="bit位值类型,这个bit(M),M表示每个值的位数,从1到64,如果省略,则默认为1.给bit类型赋值的话,可以使用b’value’进行复制,例如b’111’和b’10000000’分别代表7和128;如果你将一个长度小于M大小的值赋值给原属性列的话,会在左侧自动加上0,例如b’101’赋值给bit(6)的时候是b’000101’. 整数类型的表格   Type Storage (Bytes)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql_type40">
+<meta property="og:url" content="http://example.com/mysql-type40/index.html">
+<meta property="og:site_name" content="十号博客">
+<meta property="og:description" content="bit位值类型,这个bit(M),M表示每个值的位数,从1到64,如果省略,则默认为1.给bit类型赋值的话,可以使用b’value’进行复制,例如b’111’和b’10000000’分别代表7和128;如果你将一个长度小于M大小的值赋值给原属性列的话,会在左侧自动加上0,例如b’101’赋值给bit(6)的时候是b’000101’. 整数类型的表格   Type Storage (Bytes)">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-12-16T11:10:49.000Z">
+<meta property="article:modified_time" content="2021-12-16T11:38:44.456Z">
+<meta property="article:author" content="紫瞳小丑">
+<meta property="article:tag" content="mysql">
+<meta property="article:tag" content="datatype">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/mysql-type40/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>mysql_type40 | 十号博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">十号博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">待我归来，带你看遍世间璀璨</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-joker">
+
+    <a href="/joker/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>joker</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/mysql-type40/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="紫瞳小丑">
+      <meta itemprop="description" content="败在我手中之敌，从来不会被我视为对手，我给你时间追赶，直至你遥望不见。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="十号博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql_type40
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-12-16 19:10:49 / 修改时间：19:38:44" itemprop="dateCreated datePublished" datetime="2021-12-16T19:10:49+08:00">2021-12-16</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="bit"><a href="#bit" class="headerlink" title="bit"></a>bit</h3><p>位值类型,这个bit(M),M表示每个值的位数,从1到64,如果省略,则默认为1.给bit类型赋值的话,可以使用b’value’进行复制,例如b’111’和b’10000000’分别代表7和128;如果你将一个长度小于M大小的值赋值给原属性列的话,会在左侧自动加上0,例如b’101’赋值给bit(6)的时候是b’000101’.</p>
+<h2 id="整数类型的表格"><a href="#整数类型的表格" class="headerlink" title="整数类型的表格"></a>整数类型的表格</h2><table>
+<thead>
+<tr>
+<th align="left">Type</th>
+<th align="left">Storage (Bytes)</th>
+<th align="left">Minimum Value Signed</th>
+<th align="left">Minimum Value Unsigned</th>
+<th align="left">Maximum Value Signed</th>
+<th align="left">Maximum Value Unsigned</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>TINYINT</code></td>
+<td align="left">1</td>
+<td align="left"><code>-128</code></td>
+<td align="left"><code>0</code></td>
+<td align="left"><code>127</code></td>
+<td align="left"><code>255</code></td>
+</tr>
+<tr>
+<td align="left"><code>SMALLINT</code></td>
+<td align="left">2</td>
+<td align="left"><code>-32768</code></td>
+<td align="left"><code>0</code></td>
+<td align="left"><code>32767</code></td>
+<td align="left"><code>65535</code></td>
+</tr>
+<tr>
+<td align="left"><code>MEDIUMINT</code></td>
+<td align="left">3</td>
+<td align="left"><code>-8388608</code></td>
+<td align="left"><code>0</code></td>
+<td align="left"><code>8388607</code></td>
+<td align="left"><code>16777215</code></td>
+</tr>
+<tr>
+<td align="left"><code>INT</code></td>
+<td align="left">4</td>
+<td align="left"><code>-2147483648</code></td>
+<td align="left"><code>0</code></td>
+<td align="left"><code>2147483647</code></td>
+<td align="left"><code>4294967295</code></td>
+</tr>
+<tr>
+<td align="left"><code>BIGINT</code></td>
+<td align="left">8</td>
+<td align="left"><code>-263</code></td>
+<td align="left"><code>0</code></td>
+<td align="left"><code>263-1</code></td>
+<td align="left"><code>264-1</code></td>
+</tr>
+</tbody></table>
+<span id="more"></span>
+
+<p>对于整数数据类型，M表示最大显示宽度。最大显示宽度为255。显示宽度与类型可以存储的值范围无关，对于浮点和定点数据类型，M是可以存储的总位数。如果你将zerofill（用0去填充，使用与整数，不过快被弃用了，用于生成序列号）为数字列指定，mysql会自动将unsigned（无符号，也适用于整数）属性添加到这一列，不过应用程序可以通过LPAD()函数去填充数据,或者将格式化的数字存储在char列中.注意默认情况下是有符号的,无符号是不鼓励对定点和浮点类型使用的,用check对这些列进行一些简单的约束.</p>
+<h3 id="tinyint"><a href="#tinyint" class="headerlink" title="tinyint"></a>tinyint</h3><p>注意tinyint(1)存在一些同义词,bool,boolean.零值被认为是错误的.非零值被认为是正确的:</p>
+<blockquote>
+<p>select If(0,’true’,’false’) false</p>
+<p>select If(1,’true’,’false’) true</p>
+<p>select if(2,’true’,’false’) true</p>
+<p>注意true和false仅仅是1和0的别名</p>
+<p>select If(0=False,’true’,’false’) true</p>
+<p>select if(1=true,’true’,’false’)  true</p>
+<p>select if(2=true,’true’,’false’) false</p>
+</blockquote>
+<h3 id="smallint"><a href="#smallint" class="headerlink" title="smallint"></a>smallint</h3><p>一个小整数,范围是-32768到32767,无符号范围是0到65535</p>
+<h3 id="mediumint"><a href="#mediumint" class="headerlink" title="mediumint"></a>mediumint</h3><p>一个中等大小的整数。范围是 -8388608到8388607。无符号范围是0到16777215</p>
+<h3 id="int"><a href="#int" class="headerlink" title="int"></a>int</h3><blockquote>
+<p>和下面是同义词,4个字节</p>
+</blockquote>
+<h3 id="integer"><a href="#integer" class="headerlink" title="integer"></a>integer</h3><blockquote>
+<p>和上面是同义词,4个字节</p>
+</blockquote>
+<h3 id="bigint"><a href="#bigint" class="headerlink" title="bigint"></a>bigint</h3><p>存储位数最多的整型,唯一的使用要求是不要存储到边界值大小的数据,或者用两个特别大的数字相乘,这样会导致转化成double类型的数据;serial的别名是BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE</p>
+<h2 id="定点数类型"><a href="#定点数类型" class="headerlink" title="定点数类型"></a>定点数类型</h2><p> 小数点的位数确定,较为常用</p>
+<h2 id="decimal"><a href="#decimal" class="headerlink" title="decimal"></a>decimal</h2><p>decimal(M,D),M是总位数(精度),D是小数点后的位数(小数位数).小数点和’-‘(对于负数)不计入M,如果D没有填写,则默认为0,如果M省略,则默认值为10,所有+-*/带有decimal的列的基本计算都以65位的精度完成.3个同义词: DEC[(M[,D])][UNSIGNED]  ; NUMERIC[(M[,D])][UNSIGNED] ; FIXED[(M[,D])]<a href="%E8%BF%99%E4%B8%AA%E8%B7%9F%E5%85%B6%E4%BB%96%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F%E6%9C%89%E5%85%B3%E7%B3%BB">UNSIGNED</a></p>
+<h3 id="numeric"><a href="#numeric" class="headerlink" title="numeric"></a>numeric</h3><blockquote>
+<p>上面那个的同义词</p>
+</blockquote>
+<h2 id="浮点数类型"><a href="#浮点数类型" class="headerlink" title="浮点数类型"></a>浮点数类型</h2><h3 id="float"><a href="#float" class="headerlink" title="float"></a>float</h3><blockquote>
+<p>官网说因为MYSQL中的运算经常是用double精度的数据进行运算的,最好不要用.</p>
+<p>float(m,d)的格式类似decimal;float(p)中的p的大小:p &gt; 24 ? double(M|D) : float(M|D)</p>
+</blockquote>
+<h2 id="double"><a href="#double" class="headerlink" title="double"></a>double</h2><blockquote>
+<p>和上面那个用法差不多,是8个字节</p>
+</blockquote>
+<h3 id="real"><a href="#real" class="headerlink" title="real"></a>real</h3><blockquote>
+<p>和上面那个是同义词</p>
+</blockquote>
+<h2 id="日期和时间数据类型"><a href="#日期和时间数据类型" class="headerlink" title="日期和时间数据类型"></a>日期和时间数据类型</h2><h3 id="date"><a href="#date" class="headerlink" title="date"></a>date</h3><h3 id="time"><a href="#time" class="headerlink" title="time"></a>time</h3><h3 id="timestamp"><a href="#timestamp" class="headerlink" title="timestamp"></a>timestamp</h3><h3 id="datetime"><a href="#datetime" class="headerlink" title="datetime"></a>datetime</h3><h3 id="year"><a href="#year" class="headerlink" title="year"></a>year</h3><blockquote>
+<p>字典做的这个,你自己去看吧,我不可能帮你写的,这种东西不跟查字典一样</p>
+<p>SELECT SEC_TO_TIME(SUM(TIME_TO_SEC(<em>time_col</em>))) FROM <em>tbl_name</em>; </p>
+<p>SELECT FROM_DAYS(SUM(TO_DAYS(<em>date_col</em>))) FROM <em>tbl_name</em>;</p>
+<p>SELECT col,    CAST(col AT TIME ZONE INTERVAL ‘+00:00’ AS DATETIME) AS ut  FROM ts ORDER BY id;</p>
+</blockquote>
+<h2 id="字符串数据类型-设置编码类型可转换charset-binary"><a href="#字符串数据类型-设置编码类型可转换charset-binary" class="headerlink" title="字符串数据类型(设置编码类型可转换charset binary)"></a>字符串数据类型(设置编码类型可转换charset binary)</h2><h3 id="text-字符-gt-blob-字节-2字节-适用未知长度"><a href="#text-字符-gt-blob-字节-2字节-适用未知长度" class="headerlink" title="text(字符) -&gt; blob(字节) 2字节 适用未知长度"></a>text(字符) -&gt; blob(字节) 2字节 适用未知长度</h3><h3 id="varchar-字符-gt-varbinary-字节-适用于已知最大长度"><a href="#varchar-字符-gt-varbinary-字节-适用于已知最大长度" class="headerlink" title="varchar(字符) -&gt; varbinary(字节) 适用于已知最大长度"></a>varchar(字符) -&gt; varbinary(字节) 适用于已知最大长度</h3><h3 id="char-字符-gt-binary-字节-适用于等长字符串"><a href="#char-字符-gt-binary-字节-适用于等长字符串" class="headerlink" title="char(字符) -&gt; binary(字节) 适用于等长字符串"></a>char(字符) -&gt; binary(字节) 适用于等长字符串</h3><h3 id="mediumtext-gt-mediumblob-3字节"><a href="#mediumtext-gt-mediumblob-3字节" class="headerlink" title="mediumtext -&gt; mediumblob 3字节"></a>mediumtext -&gt; mediumblob 3字节</h3><h3 id="longtext-gt-longblob-4字节"><a href="#longtext-gt-longblob-4字节" class="headerlink" title="longtext -&gt; longblob 4字节"></a>longtext -&gt; longblob 4字节</h3><h3 id="tinytext-gt-tinyblob-1字节"><a href="#tinytext-gt-tinyblob-1字节" class="headerlink" title="tinytext -&gt; tinyblob 1字节"></a>tinytext -&gt; tinyblob 1字节</h3><h3 id="enum"><a href="#enum" class="headerlink" title="enum"></a>enum</h3><h3 id="set"><a href="#set" class="headerlink" title="set"></a>set</h3><h2 id="空间数据类型"><a href="#空间数据类型" class="headerlink" title="空间数据类型"></a>空间数据类型</h2><h3 id="multilinestring"><a href="#multilinestring" class="headerlink" title="multilinestring"></a>multilinestring</h3><h3 id="linestring"><a href="#linestring" class="headerlink" title="linestring"></a>linestring</h3><h3 id="multipoint"><a href="#multipoint" class="headerlink" title="multipoint"></a>multipoint</h3><h3 id="point"><a href="#point" class="headerlink" title="point"></a>point</h3><h3 id="mulitipolygon"><a href="#mulitipolygon" class="headerlink" title="mulitipolygon"></a>mulitipolygon</h3><h3 id="polygon"><a href="#polygon" class="headerlink" title="polygon"></a>polygon</h3><h3 id="geometry"><a href="#geometry" class="headerlink" title="geometry"></a>geometry</h3><h3 id="geometrycollection"><a href="#geometrycollection" class="headerlink" title="geometrycollection"></a>geometrycollection</h3><h2 id="json数据类型"><a href="#json数据类型" class="headerlink" title="json数据类型"></a>json数据类型</h2><h3 id="json"><a href="#json" class="headerlink" title="json"></a>json</h3>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+              <a href="/tags/datatype/" rel="tag"># datatype</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/english/" rel="prev" title="English">
+      <i class="fa fa-chevron-left"></i> English
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#bit"><span class="nav-number">1.</span> <span class="nav-text">bit</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B4%E6%95%B0%E7%B1%BB%E5%9E%8B%E7%9A%84%E8%A1%A8%E6%A0%BC"><span class="nav-number"></span> <span class="nav-text">整数类型的表格</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#tinyint"><span class="nav-number">1.</span> <span class="nav-text">tinyint</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#smallint"><span class="nav-number">2.</span> <span class="nav-text">smallint</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mediumint"><span class="nav-number">3.</span> <span class="nav-text">mediumint</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#int"><span class="nav-number">4.</span> <span class="nav-text">int</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#integer"><span class="nav-number">5.</span> <span class="nav-text">integer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bigint"><span class="nav-number">6.</span> <span class="nav-text">bigint</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E7%82%B9%E6%95%B0%E7%B1%BB%E5%9E%8B"><span class="nav-number"></span> <span class="nav-text">定点数类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#decimal"><span class="nav-number"></span> <span class="nav-text">decimal</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#numeric"><span class="nav-number">1.</span> <span class="nav-text">numeric</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E6%95%B0%E7%B1%BB%E5%9E%8B"><span class="nav-number"></span> <span class="nav-text">浮点数类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#float"><span class="nav-number">1.</span> <span class="nav-text">float</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#double"><span class="nav-number"></span> <span class="nav-text">double</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#real"><span class="nav-number">1.</span> <span class="nav-text">real</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A5%E6%9C%9F%E5%92%8C%E6%97%B6%E9%97%B4%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number"></span> <span class="nav-text">日期和时间数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#date"><span class="nav-number">1.</span> <span class="nav-text">date</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#time"><span class="nav-number">2.</span> <span class="nav-text">time</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#timestamp"><span class="nav-number">3.</span> <span class="nav-text">timestamp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#datetime"><span class="nav-number">4.</span> <span class="nav-text">datetime</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#year"><span class="nav-number">5.</span> <span class="nav-text">year</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B-%E8%AE%BE%E7%BD%AE%E7%BC%96%E7%A0%81%E7%B1%BB%E5%9E%8B%E5%8F%AF%E8%BD%AC%E6%8D%A2charset-binary"><span class="nav-number"></span> <span class="nav-text">字符串数据类型(设置编码类型可转换charset binary)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#text-%E5%AD%97%E7%AC%A6-gt-blob-%E5%AD%97%E8%8A%82-2%E5%AD%97%E8%8A%82-%E9%80%82%E7%94%A8%E6%9C%AA%E7%9F%A5%E9%95%BF%E5%BA%A6"><span class="nav-number">1.</span> <span class="nav-text">text(字符) -&gt; blob(字节) 2字节 适用未知长度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#varchar-%E5%AD%97%E7%AC%A6-gt-varbinary-%E5%AD%97%E8%8A%82-%E9%80%82%E7%94%A8%E4%BA%8E%E5%B7%B2%E7%9F%A5%E6%9C%80%E5%A4%A7%E9%95%BF%E5%BA%A6"><span class="nav-number">2.</span> <span class="nav-text">varchar(字符) -&gt; varbinary(字节) 适用于已知最大长度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#char-%E5%AD%97%E7%AC%A6-gt-binary-%E5%AD%97%E8%8A%82-%E9%80%82%E7%94%A8%E4%BA%8E%E7%AD%89%E9%95%BF%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-number">3.</span> <span class="nav-text">char(字符) -&gt; binary(字节) 适用于等长字符串</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mediumtext-gt-mediumblob-3%E5%AD%97%E8%8A%82"><span class="nav-number">4.</span> <span class="nav-text">mediumtext -&gt; mediumblob 3字节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#longtext-gt-longblob-4%E5%AD%97%E8%8A%82"><span class="nav-number">5.</span> <span class="nav-text">longtext -&gt; longblob 4字节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tinytext-gt-tinyblob-1%E5%AD%97%E8%8A%82"><span class="nav-number">6.</span> <span class="nav-text">tinytext -&gt; tinyblob 1字节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#enum"><span class="nav-number">7.</span> <span class="nav-text">enum</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#set"><span class="nav-number">8.</span> <span class="nav-text">set</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A9%BA%E9%97%B4%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number"></span> <span class="nav-text">空间数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#multilinestring"><span class="nav-number">1.</span> <span class="nav-text">multilinestring</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#linestring"><span class="nav-number">2.</span> <span class="nav-text">linestring</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#multipoint"><span class="nav-number">3.</span> <span class="nav-text">multipoint</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#point"><span class="nav-number">4.</span> <span class="nav-text">point</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mulitipolygon"><span class="nav-number">5.</span> <span class="nav-text">mulitipolygon</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#polygon"><span class="nav-number">6.</span> <span class="nav-text">polygon</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#geometry"><span class="nav-number">7.</span> <span class="nav-text">geometry</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#geometrycollection"><span class="nav-number">8.</span> <span class="nav-text">geometrycollection</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#json%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number"></span> <span class="nav-text">json数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#json"><span class="nav-number">1.</span> <span class="nav-text">json</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">紫瞳小丑</p>
+  <div class="site-description" itemprop="description">败在我手中之敌，从来不会被我视为对手，我给你时间追赶，直至你遥望不见。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫瞳小丑</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
